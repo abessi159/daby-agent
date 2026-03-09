@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Daby your AI friend</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.6.1/mermaid.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0d0d0d;
+      font-family: 'Inter', sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #chat-container {
+      width: 100%;
+      max-width: 720px;
+      height: 100vh;
+      height: 100dvh;
+      background: #111111;
+      border-radius: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 0 60px rgba(130, 80, 255, 0.15);
+      border: 1px solid #222;
+    }
+
+    #header {
+      padding: 18px 24px;
+      background: #111111;
+      border-bottom: 1px solid #222;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+   #avatar {
+      width: 48px;
+      height: 48px;
+      image-rendering: pixelated;
+      border-radius: 8px;
+      flex-shrink: 0;
+      animation: breathe 3s ease-in-out infinite;
+      transform-origin: center bottom;
+    }
+
+    @keyframes breathe {
+      0%   { transform: scaleY(1) scaleX(1); }
+      40%  { transform: scaleY(1.06) scaleX(0.97); }
+      60%  { transform: scaleY(1.06) scaleX(0.97); }
+      100% { transform: scaleY(1) scaleX(1); }
+    }
+
+    #header-text h2 {
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    #header-text p {
+      color: #8250ff;
+      font-size: 12px;
+    }
+
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      scrollbar-width: thin;
+      scrollbar-color: #222 transparent;
+    }
+
+    .message {
+      max-width: 78%;
+      padding: 13px 17px;
+      border-radius: 18px;
+      font-size: 15px;
+      line-height: 1.6;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .user {
+      background: #8250ff;
+      color: white;
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+    }
+
+    .agent {
+      background: #1a1a1a;
+      color: #e8e8e8;
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+      border: 1px solid #2a2a2a;
+    }
+
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 13px 17px;
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 18px;
+      border-bottom-left-radius: 4px;
+      align-self: flex-start;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .typing-indicator span {
+      width: 7px;
+      height: 7px;
+      background: #8250ff;
+      border-radius: 50%;
+      animation: bounce 1.2s infinite;
+    }
+
+    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+    .message table { border-collapse: collapse; width: 100%; margin: 8px 0; }
+    .message th, .message td { border: 1px solid #444; padding: 8px 12px; text-align: left; }
+    .message th { background: #2a2a2a; color: #8250ff; }
+    .message tr:nth-child(even) { background: #1f1f1f; }
+    .message ul, .message ol { padding-left: 20px; margin: 8px 0; }
+    .message li { margin: 4px 0; }
+    .message code { background: #2a2a2a; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+    .message pre { background: #2a2a2a; padding: 12px; border-radius: 8px; overflow-x: auto; margin: 8px 0; }
+    .message h1, .message h2, .message h3 { color: #8250ff; margin: 8px 0; }
+    .message blockquote { border-left: 3px solid #8250ff; padding-left: 12px; color: #aaa; margin: 8px 0; }
+.message .mermaid { width: 100%; overflow-x: auto; margin: 8px 0; }
+    .message .mermaid svg { width: 100% !important; height: auto !important; max-width: 100%; }
+    @keyframes bounce {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-6px); }
+    }
+
+    #input-area {
+      display: flex;
+      padding: 16px 20px;
+      background: #111111;
+      border-top: 1px solid #222;
+      gap: 10px;
+      align-items: center;
+    }
+
+    #input {
+      flex: 1;
+      padding: 13px 18px;
+      border-radius: 24px;
+      border: 1px solid #2a2a2a;
+      background: #1a1a1a;
+      color: white;
+      font-size: 15px;
+      outline: none;
+      font-family: 'Inter', sans-serif;
+      transition: border 0.2s;
+    }
+
+    #input:focus { border-color: #8250ff; }
+
+    #send {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, #8250ff, #ff4ecd);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s;
+    }
+
+    #send:hover { transform: scale(1.08); }
+  </style>
+</head>
+<body>
+  <div id="chat-container">
+    <div id="header">
+      <img id="avatar" src="/static/daby.png" alt="Daby" />
+      <div id="header-text">
+        <h2>Daby</h2>
+        <p>● Online</p>
+      </div>
+    </div>
+
+    <div id="messages">
+      <div class="message agent">Hey! I'm Daby🐾 I'm here to help, chat, or just listen. What's on your mind?</div>
+    </div>
+
+    <div id="input-area">
+      <input id="input" type="text" placeholder="Message Daby..." />
+      <button id="send">➤</button>
+    </div>
+  </div>
+
+  <script>
+    const messages = document.getElementById("messages");
+    const input = document.getElementById("input");
+    const send = document.getElementById("send");
+
+   mermaid.initialize({ startOnLoad: false, theme: 'dark' });
+
+    function addMessage(text, role) {
+      const div = document.createElement("div");
+      div.className = `message ${role}`;
+      if (role === "agent") {
+        const mermaidRegex = /```mermaid([\s\S]*?)```/g;
+        const hasMermaid = mermaidRegex.test(text);
+        if (hasMermaid) {
+          text = text.replace(/```mermaid([\s\S]*?)```/g, (match, code) => {
+            const id = `mermaid-${Date.now()}`;
+            return `<div class="mermaid" id="${id}">${code.trim()}</div>`;
+          });
+          div.innerHTML = marked.parse(text);
+          mermaid.run({ nodes: div.querySelectorAll('.mermaid') });
+        } else {
+          div.innerHTML = marked.parse(text);
+        }
+      } else {
+        div.textContent = text;
+      }
+      messages.appendChild(div);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    function showTyping() {
+      const div = document.createElement("div");
+      div.className = "typing-indicator";
+      div.id = "typing";
+      div.innerHTML = "<span></span><span></span><span></span>";
+      messages.appendChild(div);
+      messages.scrollTop = messages.scrollHeight;
+      return div;
+    }
+
+    async function sendMessage() {
+      const text = input.value.trim();
+      if (!text) return;
+      addMessage(text, "user");
+      input.value = "";
+
+      const typing = showTyping();
+
+      const res = await fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text })
+      });
+
+      const data = await res.json();
+      typing.remove();
+      addMessage(data.reply, "agent");
+    }
+
+    send.addEventListener("click", sendMessage);
+    input.addEventListener("keydown", e => { if (e.key === "Enter") sendMessage(); });
+ 
+  </script>
+</body>
+</html>

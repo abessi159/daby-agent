@@ -1,0 +1,10 @@
+```mermaid
+graph LR
+    A[Start] --> B[Learn Basics of Programming]
+    B --> C[Learn Math and Statistics]
+    C --> D[Learn Machine Learning]
+    D --> E[Learn Deep Learning]
+    E --> F[Learn Natural Language Processing]
+    F --> G[Practice with Projects]
+    G --> H[Stay Updated with Latest Developments]
+```
