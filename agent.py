@@ -6,8 +6,7 @@ import math
 import re
 import requests
 
-import os
-client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+client = Groq(api_key="GROQ_API_KEY")
 
 messages = [
     {
