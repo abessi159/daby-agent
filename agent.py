@@ -190,7 +190,8 @@ def chat(user_input):
         )
         reply = response.choices[0].message.content or "sorry, can you say that again?"
 
-    reply = re.sub(r'<function=.*?</function>', '', reply, flags=re.DOTALL)
+    reply = re.sub(r'<function[=(].*?</function>', '', reply, flags=re.DOTALL)
+    reply = re.sub(r'<function[=(][^>]*>\{.*?\}', '', reply, flags=re.DOTALL)
     reply = re.sub(r'```[\w]*\n.*?```', '', reply, flags=re.DOTALL)
     reply = reply.strip()
     messages.append({"role": "assistant", "content": reply})
