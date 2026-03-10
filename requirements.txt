@@ -1,0 +1,7 @@
+flask
+groq
+ddgs
+gtts
+python-dotenv
+requests
+pyngrok
