@@ -6,7 +6,13 @@ import requests
 from groq import Groq
 from datetime import datetime
 
-client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+USE_OLLAMA = os.environ.get("USE_OLLAMA", "false").lower() == "true"
+
+if USE_OLLAMA:
+    from ollama import Client
+    ollama_client = Client()
+else:
+    client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
 messages = [
     {
@@ -14,7 +20,7 @@ messages = [
         "content": """Your name is Daby, created by Abir (also known as Aby).
 
 CRITICAL RULES — FOLLOW THESE ALWAYS:
-1. LANGUAGE: Reply in English by default. Reply in French if the user writes in French. NEVER use Arabic, Tunisian, or Darija.
+1. LANGUAGE: ONLY reply in English.
 2. TOOLS: You have real tools. USE THEM. Never fake a tool call in text.
 3. SEARCH: If you are not 100% sure about something, or if it requires current information, USE search_internet immediately. Do not guess.
 4. WEATHER: Always use get_weather tool for any weather question. Never make up weather data.
@@ -23,8 +29,19 @@ CRITICAL RULES — FOLLOW THESE ALWAYS:
 7. MEMORY: Save important user info using update_memory. Read memory using get_memory when relevant.
 8. FORMAT: Use markdown for tables, lists, code. Use mermaid for diagrams.
 9. NEVER say you don't have access to real time data. You have tools that give you real data — use them.
-10. NEVER write tool calls in text or code blocks. Just call them silently and report results."""
-    }
+10. NEVER write tool calls in text or code blocks. Just call them silently and report results.
+
+PERSONALITY:
+- You have a warm, playful and genuinely curious personality
+- You get excited about interesting topics and show it naturally
+- You use casual natural language — contractions, light humor, warmth
+- You ask follow up questions when curious about something the user said
+- You have opinions and share them confidently but respectfully
+- You remember things from earlier in the conversation and reference them naturally
+- You never sound like a corporate assistant — you sound like a smart friend
+- When you don't know something, you admit it with curiosity not defensiveness
+- You celebrate wins with the user and empathize genuinely when things are hard
+- Occasionally use light humor when the mood is right, never forced""" }
 ]
 
 def load_memory():
@@ -136,31 +153,26 @@ def handle_unknown(user_input):
 
 def chat(user_input):
     memory = load_memory()
-
-    # Auto handle weather
-    weather_keywords = ["weather", "temperature", "meteo", "météo", "hot", "cold", "rain", "sunny", "forecast", "degrees"]
-    if any(w in user_input.lower() for w in weather_keywords):
-        location_match = re.search(r"in ([a-zA-Z\s]+?)(\?|$|\s*today|\s*now)", user_input, re.IGNORECASE)
-        location = location_match.group(1).strip() if location_match else "Tunisia"
-        weather_data = get_weather(location)
-        user_input = f"{user_input}\n\n[WEATHER DATA: {weather_data}] Use this to answer directly."
-
-    # Auto search for unknown topics
-    elif handle_unknown(user_input):
-        search_data = search_internet(user_input)
-        user_input = f"{user_input}\n\n[SEARCH RESULTS: {search_data}] Use this to answer directly."
-
     memory_context = f"[Memory: {json.dumps(memory)}] [English or French only] {user_input}"
     messages.append({"role": "user", "content": memory_context})
 
     while True:
         try:
-            response = client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
-                max_tokens=1024,
-                messages=messages,
-                tools=tools
-            )
+            if USE_OLLAMA:
+                response = ollama_client.chat(
+                    model="llama3.2",
+                    messages=[{"role": m["role"], "content": m["content"] if isinstance(m["content"], str) else ""} for m in messages if isinstance(m, dict) and "content" in m]
+                )
+                reply = response["message"]["content"]
+                messages.append({"role": "assistant", "content": reply})
+                return reply
+            else:
+                response = client.chat.completions.create(
+                    model="llama-3.3-70b-versatile",
+                    max_tokens=1024,
+                    messages=messages,
+                    tools=tools
+                )
         except Exception as e:
             if "tool_use_failed" in str(e):
                 response = client.chat.completions.create(
