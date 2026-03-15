@@ -240,12 +240,6 @@ def chat(user_input):
 
     reply = re.sub(r'<function[=(].*?</function>', '', reply, flags=re.DOTALL)
     reply = re.sub(r'<function[=(][^>]*>\{.*?\}', '', reply, flags=re.DOTALL)
-    reply = re.sub(r'\*gets.*?\*', '', reply, flags=re.DOTALL)
-    reply = re.sub(r'\*checks.*?\*', '', reply, flags=re.DOTALL)
-    reply = re.sub(r'\*searches.*?\*', '', reply, flags=re.DOTALL)
-    reply = re.sub(r'\*fetches.*?\*', '', reply, flags=re.DOTALL)
-    reply = re.sub(r'\*looks.*?\*', '', reply, flags=re.DOTALL)
-    reply = re.sub(r'```[\w]*\n.*?```', '', reply, flags=re.DOTALL)
     reply = reply.strip()
     messages.append({"role": "assistant", "content": reply})
     return reply
