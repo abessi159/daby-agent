@@ -152,7 +152,7 @@ python app.py
 
 ## Author
 
-**Abir Abessi** — First-year Software Engineering student at EPI School, Sousse, Tunisia
+**Abir Abessi** — Software Development student at EPI School, Sousse, Tunisia
 
 - GitHub: [@abessi159](https://github.com/abessi159)
 
