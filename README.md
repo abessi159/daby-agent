@@ -6,11 +6,6 @@ A full-stack conversational AI agent built with Python, Flask, and the Groq API.
 
 ---
 
-## Live Demo
-
-[Try Daby here](https://daby-agent.onrender.com)
-
----
 
 ## Features
 
