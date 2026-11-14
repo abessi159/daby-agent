@@ -9,6 +9,10 @@ from datetime import datetime
 
 USE_OLLAMA = os.environ.get("USE_OLLAMA", "false").lower() == "true"
 
+# Groq retired llama-3.3-70b-versatile on 16 Aug 2026.
+# Change the model here (or set GROQ_MODEL on Render) instead of editing the code below.
+MODEL = os.environ.get("GROQ_MODEL", "openai/gpt-oss-120b")
+
 if USE_OLLAMA:
     from ollama import Client
     ollama_client = Client()
@@ -204,7 +208,7 @@ def chat(user_input):
                 return reply
             else:
                 response = client.chat.completions.create(
-                    model="llama-3.3-70b-versatile",
+                    model=MODEL,
                     max_tokens=1024,
                     messages=messages,
                     tools=tools
@@ -212,7 +216,7 @@ def chat(user_input):
         except Exception as e:
             if "tool_use_failed" in str(e):
                 response = client.chat.completions.create(
-                    model="llama-3.3-70b-versatile",
+                    model=MODEL,
                     max_tokens=1024,
                     messages=messages
                 )
@@ -232,7 +236,7 @@ def chat(user_input):
     reply = response.choices[0].message.content
     if not reply:
         response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model=MODEL,
             max_tokens=1024,
             messages=messages
         )
